@@ -1,11 +1,4 @@
 
-export enum GenerationStatus {
-  IDLE = 'IDLE',
-  GENERATING = 'GENERATING',
-  COMPLETE = 'COMPLETE',
-  ERROR = 'ERROR'
-}
-
 export interface GlyphData {
   char: string;
   imageUrl: string | null;
@@ -14,8 +7,3 @@ export interface GlyphData {
 }
 
 export type FontMap = Record<string, string>;
-
-export interface GenerationConfig {
-  prompt: string;
-  stylePreset?: string;
-}

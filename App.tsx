@@ -1,9 +1,11 @@
+
 import React, { useState, useCallback, useRef } from 'react';
 import { FULL_ALPHABET, DEFAULT_GRID_STATES } from './constants';
 import { GlyphData, FontMap } from './types';
 import { GlyphCard } from './components/GlyphCard';
 import { TypeTester } from './components/TypeTester';
 import { GlyphEditor } from './components/GlyphEditor';
+import { GlyphDisplay } from './components/GlyphDisplay';
 
 // Initialize glyphs state with defaults - strictly geometric now
 const INITIAL_GLYPHS: GlyphData[] = FULL_ALPHABET.map(char => ({
@@ -15,7 +17,9 @@ const INITIAL_GLYPHS: GlyphData[] = FULL_ALPHABET.map(char => ({
 
 export default function App() {
   const [glyphs, setGlyphs] = useState<GlyphData[]>(INITIAL_GLYPHS);
-  const [apiKeyError, setApiKeyError] = useState(false);
+  
+  // UI State
+  const [isEditingGlyphs, setIsEditingGlyphs] = useState(false);
   
   // Edit State
   const [editingGlyph, setEditingGlyph] = useState<string | null>(null);
@@ -129,39 +133,49 @@ export default function App() {
     <div className="min-h-screen bg-stone-50 pb-20">
       {/* Header */}
       <header className="bg-white border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center text-white font-serif text-2xl font-bold shadow-lg shadow-teal-600/20">
+             <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white font-serif text-xl font-bold shadow-lg shadow-teal-600/20">
                Ā
              </div>
              <div>
-               <h1 className="text-2xl font-serif font-bold text-stone-900 tracking-tight leading-none">AlohaType</h1>
-               <p className="text-xs text-stone-500 font-medium">Hawaiian Glyph Generator</p>
+               <h1 className="text-xl font-serif font-bold text-stone-900 tracking-tight leading-none">AlohaType</h1>
+               <p className="text-[10px] text-stone-500 font-medium">Hawaiian Glyph Generator</p>
              </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-             {/* Action Buttons */}
-             <div className="flex items-center gap-2">
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        
+        {/* 1. Character Set (Minimized & Collapsible) */}
+        <section className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden transition-all">
+          <div className="bg-stone-50/50 px-4 py-2 border-b border-stone-100 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold text-stone-500 uppercase tracking-wide flex items-center gap-2">
+                Glyphs 
+                {!isEditingGlyphs && <span className="text-[10px] bg-stone-100 text-stone-400 px-1.5 rounded-full border border-stone-200">{glyphs.length}</span>}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-3">
                 <button 
                   onClick={handleExportFont}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg transition-colors"
+                  className="text-stone-400 hover:text-stone-700 transition-colors"
                   title="Download Font JSON"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
-                  Export
                 </button>
                 <button 
                   onClick={handleImportClick}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg transition-colors"
+                  className="text-stone-400 hover:text-stone-700 transition-colors"
                   title="Upload Font JSON"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" transform="rotate(180 10 10)"/>
                   </svg>
-                  Import
                 </button>
                 <input 
                   type="file" 
@@ -170,52 +184,84 @@ export default function App() {
                   accept=".json" 
                   className="hidden" 
                 />
-             </div>
-          </div>
-        </div>
-      </header>
+                
+                <div className="w-px h-4 bg-stone-200"></div>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-12">
-        
-        {/* API Key Error Warning */}
-        {apiKeyError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <div>
-              <p className="font-bold">API Key Error</p>
-              <p className="text-sm">Could not access the Gemini API. Please ensure your environment is configured correctly with a valid API key.</p>
+                <button
+                  onClick={() => setIsEditingGlyphs(!isEditingGlyphs)}
+                  className={`text-xs font-bold uppercase tracking-wider transition-colors ${
+                    isEditingGlyphs 
+                      ? 'text-teal-600' 
+                      : 'text-stone-400 hover:text-teal-600'
+                  }`}
+                >
+                  {isEditingGlyphs ? 'Done' : 'Edit'}
+                </button>
             </div>
           </div>
-        )}
-
-        {/* Glyph Grid */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-serif font-bold text-stone-800">Character Set</h2>
-            <p className="text-sm text-stone-500">
-               Click the "pencil" icon on any card to customize its geometric design.
-            </p>
-          </div>
           
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-4">
-            {glyphs.map((glyph) => (
-              <GlyphCard 
-                key={glyph.char} 
-                glyph={glyph} 
-                onEdit={handleEditClick}
-              />
-            ))}
+          <div className={`${isEditingGlyphs ? 'p-4' : 'px-4 py-3'}`}>
+            {isEditingGlyphs ? (
+              // Mode A: Interactive Editor Grid
+              <div className="grid grid-cols-8 sm:grid-cols-10 md:grid-cols-13 gap-2 animate-in fade-in duration-300">
+                {glyphs.map((glyph) => (
+                  <GlyphCard 
+                    key={glyph.char} 
+                    glyph={glyph} 
+                    onEdit={handleEditClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              // Mode B: Very Compact Read-Only "Strip"
+              <div className="flex flex-wrap gap-2 justify-center animate-in fade-in duration-300">
+                {glyphs.map((glyph) => (
+                  <div 
+                    key={glyph.char} 
+                    className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                    onClick={() => handleEditClick(glyph.char)}
+                  >
+                    <div 
+                      className="w-8 h-8 sm:w-10 sm:h-10 p-0.5 rounded border border-stone-100 bg-stone-50 flex items-center justify-center relative select-none overflow-hidden transition-all group-hover:border-teal-400 group-hover:bg-white group-hover:shadow-md group-hover:-translate-y-0.5"
+                      title={`Edit ${glyph.char}`}
+                    >
+                       {glyph.gridState && glyph.gridState.length > 0 ? (
+                         <GlyphDisplay 
+                           gridState={glyph.gridState} 
+                           color="#0c0a09" // darker stone-950
+                           autoCrop={true}
+                           className="w-full h-full" 
+                         />
+                       ) : (
+                         <span className="text-[10px] text-stone-300 font-serif font-bold">{glyph.char}</span>
+                       )}
+                    </div>
+                     
+                     {/* Annotation - Floating beneath */}
+                     <span className="text-[8px] font-bold text-stone-400 leading-none group-hover:text-teal-600 transition-colors">
+                       {glyph.char}
+                     </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Helper Text only in Edit Mode */}
+            {isEditingGlyphs && (
+                <div className="mt-4 pt-3 border-t border-stone-100 text-center">
+                   <p className="text-[10px] text-stone-400">
+                     Click any card above to launch the geometry editor.
+                   </p>
+                </div>
+            )}
           </div>
         </section>
 
-        {/* Type Tester */}
-        <section className="pb-12">
+        {/* 2. Type Tester (Primary UI) */}
+        <section>
            <TypeTester 
              fontMap={fontMap} 
              glyphs={glyphs} 
-             onApiKeyError={() => setApiKeyError(true)}
            />
         </section>
 

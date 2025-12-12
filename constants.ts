@@ -11,15 +11,6 @@ export const KAHAKO_VOWELS = [
 
 export const FULL_ALPHABET = [...HAWAIIAN_ALPHABET, ...KAHAKO_VOWELS];
 
-export const STYLE_PRESETS = [
-  { id: 'lava', label: 'Volcanic Lava', prompt: 'glowing molten lava rock texture, dark igneous rock background, fiery cracks' },
-  { id: 'floral', label: 'Tropical Floral', prompt: 'composed of vibrant hibiscus flowers, plumeria, and monstera leaves, botanical illustration style' },
-  { id: 'ocean', label: 'Ocean Waves', prompt: 'made of crashing blue ocean waves, sea foam, water droplets, dynamic liquid motion' },
-  { id: 'wood', label: 'Polynesian Wood', prompt: 'hand-carved koa wood texture, traditional polynesian tribal patterns, intricate carving details' },
-  { id: 'vintage', label: 'Vintage Travel', prompt: '1950s hawaii travel poster style, retro colors, bold graphic design, textured paper' },
-  { id: 'tapa', label: 'Kapa Cloth', prompt: 'traditional Hawaiian kapa cloth patterns, earth tones, geometric stamped designs, textured fabric' },
-];
-
 export const SAMPLE_TEXTS = [
   "Aloha Kakahiaka",
   "Mahalo Nui Loa",
